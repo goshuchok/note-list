@@ -1,25 +1,71 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { useMemo } from 'react';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import { Container } from 'react-bootstrap';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { NewNote } from './pages/NewNote';
+import { useLocalStorage } from './useLocalStorage';
+import { NoteList } from './pages/NoteList';
+import { NoteLayout } from './components/NoteLayout';
+import { Note } from './pages/Note';
+import { EditNote } from './pages/EditNote';
+import { RawNote, Tag } from './types';
 
 function App() {
+  const [notes, setNotes] = useLocalStorage<RawNote[]>('NOTES', []);
+  const [tags, setTags] = useLocalStorage<Tag[]>('TAGS', []);
+
+  const notesWithTags = useMemo(() => {
+    return notes.map((note) => {
+      return {
+        ...note,
+        tags: tags.filter((tag) => note.tagIds.includes(tag.id)),
+      };
+    });
+  }, [notes, tags]);
+
+  function addTag(tag: Tag) {
+    setTags((prev) => [...prev, tag]);
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Container className="my-4">
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <NoteList
+              availableTags={tags}
+              notes={notesWithTags}
+              setTags={setTags}
+            />
+          }
+        />
+        <Route
+          path="/new"
+          element={
+            <NewNote
+              setNotes={setNotes}
+              onAddTag={addTag}
+              availableTags={tags}
+            />
+          }
+        />
+        <Route path="/:id" element={<NoteLayout notes={notesWithTags} />}>
+          <Route index element={<Note setNotes={setNotes} />} />
+          <Route
+            path="edit"
+            element={
+              <EditNote
+                setNotes={setNotes}
+                onAddTag={addTag}
+                availableTags={tags}
+              />
+            }
+          />
+        </Route>
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+    </Container>
   );
 }
 
