@@ -17,23 +17,6 @@ export function NoteList({ availableTags, notes, setTags }: NoteListProps) {
   const [title, setTitle] = useState('');
   const [editTagsModalOpen, setEditTagsModalOpen] = useState(false);
 
-  function deleteTag(id: string) {
-    setTags((prevTag) => {
-      return prevTag.filter((tag) => tag.id !== id);
-    });
-  }
-  function updateTag(id: string, label: string) {
-    setTags((prevTag) => {
-      return prevTag.map((tag) => {
-        if (tag.id === id) {
-          return { ...tag, label };
-        } else {
-          return tag;
-        }
-      });
-    });
-  }
-
   const filteredNotes = useMemo(() => {
     return notes.filter((note) => {
       return (
@@ -113,8 +96,7 @@ export function NoteList({ availableTags, notes, setTags }: NoteListProps) {
         availableTags={availableTags}
         handleClose={() => setEditTagsModalOpen(false)}
         show={editTagsModalOpen}
-        onDeleteTag={deleteTag}
-        onUpdateTag={updateTag}
+        setTags={setTags}
       />
     </>
   );

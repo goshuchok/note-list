@@ -5,17 +5,32 @@ type EditTagsModalProps = {
   availableTags: Tag[];
   show: boolean;
   handleClose: () => void;
-  onDeleteTag: (id: string) => void;
-  onUpdateTag: (id: string, label: string) => void;
+  setTags: React.Dispatch<React.SetStateAction<Tag[]>>;
 };
 
 export function EditTagsModal({
   availableTags,
   handleClose,
   show,
-  onDeleteTag,
-  onUpdateTag,
+  setTags,
 }: EditTagsModalProps) {
+  function onDeleteTag(id: string) {
+    setTags((prevTag) => {
+      return prevTag.filter((tag) => tag.id !== id);
+    });
+  }
+  function onUpdateTag(id: string, label: string) {
+    setTags((prevTag) => {
+      return prevTag.map((tag) => {
+        if (tag.id === id) {
+          return { ...tag, label };
+        } else {
+          return tag;
+        }
+      });
+    });
+  }
+
   return (
     <Modal show={show} onHide={handleClose}>
       <Modal.Header closeButton>
